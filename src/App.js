@@ -25,7 +25,8 @@ function App() {
         const getData = async () => {
             if (checkPublicPath(location.pathname)) return;
             const data = await getUserDetails();
-            if (!data) history.push("/login?msg=Please login first");
+            if (!data || !data.email)
+                history.push("/login?msg=Please login first");
             else setAuthenticated(true);
         };
         getData();

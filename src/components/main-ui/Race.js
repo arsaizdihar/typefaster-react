@@ -8,6 +8,7 @@ const Race = (props) => {
     const [type, setType] = useState("");
     const [disabled, setDisabled] = useState(false);
     const [startTime, setStartTime] = useState(null);
+    const [focus, setFocus] = useState(false);
     const inputRef = useRef();
 
     useEffect(() => {
@@ -16,6 +17,7 @@ const Race = (props) => {
             else props.history.push("/login");
         });
         inputRef.current.focus();
+        setFocus(true);
         return () => {
             setDisabled(false);
             setStartTime(null);
@@ -28,7 +30,7 @@ const Race = (props) => {
     const handleRetryButton = async () => {
         await fetchWithToken("api/random-words/20", "GET", null).then(
             (data) => {
-                if (data) setQuestion(data.join(" "));
+                if (Array.isArray(data)) setQuestion(data.join(" "));
                 else props.history.push("/login");
             }
         );
@@ -38,6 +40,7 @@ const Race = (props) => {
         setWordCount(0);
         setType("");
         inputRef.current.focus();
+        setFocus(true);
     };
 
     const splitted_question = question.split(" ");
@@ -64,41 +67,63 @@ const Race = (props) => {
         }
     };
     let charCount = 0;
+    let wrongChars = 0;
     for (let i = 0; i < wordCount; i++) {
         charCount += splitted_question[i].length + 1;
     }
-    if (!isWrong) charCount += type.length;
-    else {
+    if (!isWrong) {
+        charCount += type.length;
+    } else {
         for (let i = 1; i < type.length; i++) {
             if (splitted_question[wordCount].startsWith(type.substring(0, i)))
                 charCount++;
+            else wrongChars++;
         }
+        wrongChars++;
     }
-    const wpm = (charCount / (new Date().getTime() - startTime)) * 1000 * 12;
+    const correctChars = question.substring(0, charCount);
+    const defChars = question.substring(charCount + wrongChars);
+    let wpm = (charCount / (new Date().getTime() - startTime)) * 1000 * 12;
+    if (wpm > 300) wpm = 0;
     return (
         <div className="flex flex-wrap w-full md:w-3/4 lg:md-1/2 pt-8 mx-auto px-5">
             <h1 className="w-full text-7xl text-center pb-5 font-mono font-extrabold">
                 {wpm.toFixed(2)}
             </h1>
-            <p className="text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-blue-100 font-mono font-extralight">
+            <p
+                className={
+                    disabled
+                        ? "text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-green-300 font-mono font-extralight cursor-pointer"
+                        : "text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-blue-100 font-mono font-extralight cursor-pointer"
+                }
+                onClick={() => {
+                    inputRef.current.focus();
+                    if (!focus) setFocus(true);
+                }}
+            >
                 <span className="font-extrabold text-blue-700">
-                    {question.substring(0, charCount)}
+                    {correctChars}
                 </span>
-                <span className="-mx-1.5 animate-pulse-fast">|</span>
-                <span className={isWrong ? "text-red-700" : ""}>
-                    {question.substring(charCount)}
+                <span className="font-extrabold text-red-700 bg-red-100">
+                    {question.substring(charCount, charCount + wrongChars)}
                 </span>
+                {focus && <span className="-mx-1.5 animate-pulse-fast">|</span>}
+                {defChars}
             </p>
             <input
                 type="text"
                 name="typing"
                 value={type}
                 onChange={handleCorrection}
-                className={
-                    isWrong
-                        ? "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-red-700 bg-red-300 leading-tight focus:border-gray-800 h-10"
-                        : "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-gray-700 bg-gray-200 leading-tight focus:border-gray-800 h-10"
-                }
+                onBlur={function (e) {
+                    setFocus(false);
+                }}
+                // className={
+                //     isWrong
+                //         ? "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-red-700 bg-red-300 leading-tight focus:border-gray-800 h-10"
+                //         : "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-gray-700 bg-gray-200 leading-tight focus:border-gray-800 h-10"
+                // }
+                className="w-0 h-0"
                 spellCheck="false"
                 placeholder="Start typing"
                 autoCorrect="off"
