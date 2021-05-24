@@ -72,22 +72,28 @@ const Race = (props) => {
     };
     let charCount = 0;
     let wrongChars = 0;
-    for (let i = 0; i < wordCount; i++) {
-        charCount += splitted_question[i].length + 1;
-    }
-    if (!isWrong) {
-        charCount += type.length;
-    } else {
-        for (let i = 1; i < type.length; i++) {
-            if (splitted_question[wordCount].startsWith(type.substring(0, i)))
-                charCount++;
-            else {
-                wrongChars += type.length - i;
-                break;
-            }
+    try {
+        for (let i = 0; i < wordCount; i++) {
+            charCount += splitted_question[i].length + 1;
         }
-        wrongChars++;
-    }
+        if (!isWrong) {
+            charCount += type.length;
+        } else {
+            for (let i = 1; i < type.length; i++) {
+                if (
+                    splitted_question[wordCount].startsWith(
+                        type.substring(0, i)
+                    )
+                )
+                    charCount++;
+                else {
+                    wrongChars += type.length - i;
+                    break;
+                }
+            }
+            wrongChars++;
+        }
+    } catch {}
     const correctChars = question.substring(0, charCount);
     const defChars = question.substring(charCount + wrongChars);
     let wpm = (charCount / (new Date().getTime() - startTime)) * 1000 * 12;
