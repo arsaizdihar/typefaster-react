@@ -20,16 +20,13 @@ export const fetchWithToken = async (endpoint, method, data) => {
         .then((res) => {
             return res.data;
         })
-        .catch((err) => {
+        .catch(async (err) => {
             if (err.response) {
-                if (err.response.status === 422) {
-                    refreshToken().then((canRefresh) => {
-                        if (canRefresh)
-                            return fetchWithToken(endpoint, method, data);
-                    });
-                } else {
-                    return err.response.data;
-                }
+                return await refreshToken().then(async (canRefresh) => {
+                    if (canRefresh)
+                        return await fetchWithToken(endpoint, method, data);
+                    else return err.response.data;
+                });
             }
         });
 };

@@ -46,9 +46,15 @@ const Race = (props) => {
     const splitted_question = question.split(" ");
     const handleCorrection = (e) => {
         const value = e.currentTarget.value;
+        const prefValue = type;
         const currentWord = splitted_question[wordCount];
         if (startTime === null) setStartTime(new Date().getTime());
+        if (Math.abs(prefValue.length - value.length) !== 1) return;
         setType(value);
+        if (value === "") {
+            setIsWrong(false);
+            return;
+        }
         if (value.trim() === currentWord && value !== currentWord) {
             setWordCount(wordCount + 1);
             setType("");
@@ -77,7 +83,10 @@ const Race = (props) => {
         for (let i = 1; i < type.length; i++) {
             if (splitted_question[wordCount].startsWith(type.substring(0, i)))
                 charCount++;
-            else wrongChars++;
+            else {
+                wrongChars += type.length - i;
+                break;
+            }
         }
         wrongChars++;
     }
@@ -87,14 +96,14 @@ const Race = (props) => {
     if (wpm > 300) wpm = 0;
     return (
         <div className="flex flex-wrap w-full md:w-3/4 lg:md-1/2 pt-8 mx-auto px-5">
-            <h1 className="w-full text-7xl text-center pb-5 font-mono font-extrabold">
+            <h1 className="w-full text-5xl sm:text-7xl text-center pb-5 font-mono font-extrabold">
                 {wpm.toFixed(2)}
             </h1>
             <p
                 className={
                     disabled
-                        ? "text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-green-300 font-mono font-extralight cursor-pointer"
-                        : "text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-blue-100 font-mono font-extralight cursor-pointer"
+                        ? "text-lg sm:text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-green-300 font-mono font-extralight cursor-pointer"
+                        : "text-lg sm:text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-blue-100 font-mono font-extralight cursor-pointer"
                 }
                 onClick={() => {
                     inputRef.current.focus();
@@ -115,15 +124,15 @@ const Race = (props) => {
                 name="typing"
                 value={type}
                 onChange={handleCorrection}
-                onBlur={function (e) {
+                onBlur={function () {
                     setFocus(false);
                 }}
-                // className={
-                //     isWrong
-                //         ? "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-red-700 bg-red-300 leading-tight focus:border-gray-800 h-10"
-                //         : "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-gray-700 bg-gray-200 leading-tight focus:border-gray-800 h-10"
-                // }
-                className="w-0 h-0"
+                onFocus={() => setFocus(true)}
+                className={
+                    isWrong
+                        ? "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-red-700 bg-red-300 leading-tight focus:border-gray-800 h-10 sm:w-0 sm:h-0 sm:p-0"
+                        : "text-m font-semibold appearance-none rounded w-full py-2 px-3 text-gray-700 bg-gray-200 leading-tight focus:border-gray-800 h-10 sm:w-0 sm:h-0 sm:p-0"
+                }
                 spellCheck="false"
                 placeholder="Start typing"
                 autoCorrect="off"
