@@ -28,12 +28,10 @@ const Race = (props) => {
     }, [props.history]);
 
     const handleRetryButton = async () => {
-        await fetchWithToken("api/random-words/20", "GET", null).then(
-            (data) => {
-                if (Array.isArray(data)) setQuestion(data.join(" "));
-                else props.history.push("/login");
-            }
-        );
+        await fetchWithToken("api/random-words", "GET", null).then((data) => {
+            if (typeof data === "string") setQuestion(data);
+            else props.history.push("/login");
+        });
         setDisabled(false);
         setStartTime(null);
         setIsWrong(false);

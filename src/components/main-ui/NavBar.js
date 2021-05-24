@@ -1,5 +1,5 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+import { BellIcon } from "@heroicons/react/outline";
 import { Fragment, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -23,23 +23,55 @@ function NavBar(props) {
                             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                                 {/* Mobile menu button*/}
                                 <Disclosure.Button
-                                    className="inline-flex items-center justify-center p-2 rounded-md text-indigo-400 hover:text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                                    className="inline-flex items-center justify-center p-4 text-indigo-400 hover:text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                                     ref={disButton}
                                 >
                                     <span className="sr-only">
                                         Open main menu
                                     </span>
-                                    {open ? (
-                                        <XIcon
-                                            className="block h-6 w-6"
-                                            aria-hidden="true"
-                                        />
-                                    ) : (
-                                        <MenuIcon
-                                            className="block h-6 w-6"
-                                            aria-hidden="true"
-                                        />
-                                    )}
+                                    <div className="block w-5 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        {open ? (
+                                            <>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute h-0.5 w-5 bg-current transform transition duration-500 ease-in-out rotate-45"
+                                                ></span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute  h-0.5 w-5 bg-current   transform transition duration-500 ease-in-out opacity-0"
+                                                ></span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute  h-0.5 w-5 bg-current transform  transition duration-500 ease-in-out -rotate-45"
+                                                ></span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute h-0.5 w-5 bg-current transform transition duration-500 ease-in-out -translate-y-1.5"
+                                                ></span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute  h-0.5 w-5 bg-current   transform transition duration-500 ease-in-out"
+                                                ></span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="block absolute  h-0.5 w-5 bg-current transform  transition duration-500 ease-in-out translate-y-1.5"
+                                                ></span>
+                                            </>
+
+                                            //     <XIcon
+                                            //         className="block h-6 w-6"
+                                            //         aria-hidden="true"
+                                            //     />
+                                            // ) : (
+                                            //     <MenuIcon
+                                            //         className="block h-6 w-6"
+                                            //         aria-hidden="true"
+                                            //     />
+                                        )}
+                                    </div>
                                 </Disclosure.Button>
                             </div>
                             <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
