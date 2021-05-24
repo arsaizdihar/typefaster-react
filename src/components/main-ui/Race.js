@@ -12,8 +12,8 @@ const Race = (props) => {
     const inputRef = useRef();
 
     useEffect(() => {
-        fetchWithToken("api/random-words/20", "GET", null).then((data) => {
-            if (data) setQuestion(data.join(" "));
+        fetchWithToken("api/random-words", "GET", null).then((data) => {
+            if (typeof data === "string") setQuestion(data);
             else props.history.push("/login");
         });
         inputRef.current.focus();
