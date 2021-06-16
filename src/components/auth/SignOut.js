@@ -4,8 +4,8 @@ const SignOut = (props) => {
     useEffect(() => {
         window.localStorage.removeItem("token");
         window.localStorage.removeItem("refresh_token");
-        props.history.push("/login");
         props.signoutCallback();
+        props.history.push("/login");
     });
     return <div></div>;
 };

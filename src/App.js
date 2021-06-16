@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { getUserDetails } from "./util";
 import SignOut from "./components/auth/SignOut";
 
-const publicPages = ["/sign-up", "/login"];
+const publicPages = ["/sign-up", "/login", "/", "/race"];
 
 const checkPublicPath = (path) => {
     for (let i = 0; i < publicPages.length; i++) {

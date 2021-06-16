@@ -6,16 +6,23 @@ export const getUserDetails = async () => {
     return await fetchWithToken("api/auth/get-user", "GET", null);
 };
 
-export const fetchWithToken = async (endpoint, method, data) => {
+export const fetchWithToken = async (
+    endpoint,
+    method,
+    data,
+    optional = false
+) => {
     const token = window.localStorage.getItem("token");
+    if (token === null && !optional) return {};
+    let headers = {
+        "Content-Type": "application/json",
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
     return await axios({
         method: method,
         url: urlRoot + endpoint,
         data: data,
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
+        headers,
     })
         .then((res) => {
             return res.data;

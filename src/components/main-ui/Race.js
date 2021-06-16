@@ -1,5 +1,44 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchWithToken } from "../../util";
+
+let count = 0;
+let startTime;
+let countDisabled = false;
+
+const WPMComponent = ({ disabled, restart }) => {
+    const [wpm, setWpm] = useState(0);
+    const countWpm = useCallback(() => {
+        if (startTime) {
+            let wpm = (count / (new Date().getTime() - startTime)) * 1000 * 12;
+            if (wpm < 400) {
+                setWpm(wpm);
+            }
+        }
+    }, [setWpm]);
+    useEffect(() => {
+        let interval = window.setInterval(() => {
+            if (!countDisabled) {
+                countWpm();
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [countWpm]);
+
+    useEffect(() => {
+        if (disabled) countWpm();
+    }, [disabled, countWpm]);
+
+    useEffect(() => {
+        if (restart) {
+            setWpm(0);
+        }
+    }, [restart]);
+    return (
+        <h1 className="w-full text-5xl sm:text-7xl text-center pb-5 font-mono font-extrabold">
+            {wpm.toFixed(2)}
+        </h1>
+    );
+};
 
 const Race = (props) => {
     const [question, setQuestion] = useState("");
@@ -7,12 +46,11 @@ const Race = (props) => {
     const [isWrong, setIsWrong] = useState(false);
     const [type, setType] = useState("");
     const [disabled, setDisabled] = useState(false);
-    const [startTime, setStartTime] = useState(null);
     const [focus, setFocus] = useState(false);
     const inputRef = useRef();
 
     useEffect(() => {
-        fetchWithToken("api/random-words", "GET", null).then((data) => {
+        fetchWithToken("api/random-words", "GET", null, true).then((data) => {
             if (typeof data === "string") setQuestion(data);
             else props.history.push("/login");
         });
@@ -20,7 +58,7 @@ const Race = (props) => {
         setFocus(true);
         return () => {
             setDisabled(false);
-            setStartTime(null);
+            startTime = null;
             setIsWrong(false);
             setWordCount(0);
             setType("");
@@ -28,16 +66,19 @@ const Race = (props) => {
     }, [props.history]);
 
     const handleRetryButton = async () => {
-        await fetchWithToken("api/random-words", "GET", null).then((data) => {
-            if (typeof data === "string") setQuestion(data);
-            else props.history.push("/login");
-        });
+        await fetchWithToken("api/random-words", "GET", null, true).then(
+            (data) => {
+                if (typeof data === "string") setQuestion(data);
+                else props.history.push("/login");
+            }
+        );
         setDisabled(false);
-        setStartTime(null);
+        startTime = null;
         setIsWrong(false);
         setWordCount(0);
+        count = 0;
         setType("");
-        inputRef.current.focus();
+        if (inputRef.current) inputRef.current.focus();
         setFocus(true);
     };
 
@@ -46,7 +87,7 @@ const Race = (props) => {
         const value = e.currentTarget.value;
         const prefValue = type;
         const currentWord = splitted_question[wordCount];
-        if (startTime === null) setStartTime(new Date().getTime());
+        if (!startTime) startTime = new Date().getTime();
         if (Math.abs(prefValue.length - value.length) !== 1) return;
         setType(value);
         if (value === "") {
@@ -96,13 +137,14 @@ const Race = (props) => {
     } catch {}
     const correctChars = question.substring(0, charCount);
     const defChars = question.substring(charCount + wrongChars);
-    let wpm = (charCount / (new Date().getTime() - startTime)) * 1000 * 12;
-    if (wpm > 300) wpm = 0;
+    countDisabled = disabled;
+    count = charCount;
     return (
         <div className="flex flex-wrap w-full md:w-3/4 lg:md-1/2 pt-8 mx-auto px-5">
-            <h1 className="w-full text-5xl sm:text-7xl text-center pb-5 font-mono font-extrabold">
-                {wpm.toFixed(2)}
-            </h1>
+            <WPMComponent
+                disabled={disabled}
+                restart={!startTime && count === 0}
+            />
             <p
                 className={
                     disabled
@@ -110,7 +152,7 @@ const Race = (props) => {
                         : "text-lg sm:text-xl w-full py-2 px-3 rounded-lg mb-4 text-gray-900 bg-blue-100 font-mono font-extralight cursor-pointer"
                 }
                 onClick={() => {
-                    inputRef.current.focus();
+                    if (inputRef.current) inputRef.current.focus();
                     if (!focus) setFocus(true);
                 }}
             >
